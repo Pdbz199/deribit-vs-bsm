@@ -49,7 +49,7 @@ instrument_names = list(map(lambda instrument: instrument['instrument_name'], in
 expiration_times = list(map(lambda instrument: instrument['expiration_timestamp'], instruments))
 strikes = list(map(lambda instrument: instrument['strike'], instruments))
 instrument_data = json_to_dataframe(retrieve_historic_data(start, end, instrument_names[0], timeframe))
-for instrument_name in instrument_names[:1]:
+for instrument_name in instrument_names:
     # print("Instrument name:", instrument_name)
     json_res = retrieve_historic_data(start, end, instrument_name, timeframe)
 
@@ -79,17 +79,17 @@ btc_historical_dataframe['time'] = pd.to_datetime(btc_historical_dataframe['time
 
 #%% Calculate volatility
 # 2-3 hours/~180 data points
-window_size = 180
-log_prices = btc_historical_dataframe['close'].apply(lambda close: np.log(close))
-btc_historical_dataframe['std_close'] = log_prices.rolling(window_size).pct_change().std()
+# window_size = 180
+# log_prices = btc_historical_dataframe['close'].apply(lambda close: np.log(close))
+# btc_historical_dataframe['std_close'] = log_prices.rolling(window_size).pct_change().std()
 
-#%% Contracts expire at 8 UTC exactly
-times_to_expiration_matrix = []
-for expiration in expiration_times:
-    times_to_expiration = instrument_data.groupby("contract_name")['timestamp'].apply(lambda timestamp: expiration - timestamp.timestamp())
-    times_to_expiration_matrix.append(times_to_expiration)
-times_to_expiration_matrix = np.array(times_to_expiration_matrix)
-print(times_to_expiration_matrix.shape)
+# #%% Contracts expire at 8 UTC exactly
+# times_to_expiration_matrix = []
+# for expiration in expiration_times:
+#     times_to_expiration = instrument_data.groupby("contract_name")['timestamp'].apply(lambda timestamp: expiration - timestamp.timestamp())
+#     times_to_expiration_matrix.append(times_to_expiration)
+# times_to_expiration_matrix = np.array(times_to_expiration_matrix)
+# print(times_to_expiration_matrix.shape)
 
-#%% Calculate Black-Scholes
-price_data = btc_historical_dataframe['close'].to_numpy()
+# #%% Calculate Black-Scholes
+# price_data = btc_historical_dataframe['close'].to_numpy()
