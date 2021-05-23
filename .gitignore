@@ -1,3 +1,6 @@
 deribit-python-api-client/
 .env
 notes.txt
+.vscode/
+.ipynb_checkpoints/
+__pycache__

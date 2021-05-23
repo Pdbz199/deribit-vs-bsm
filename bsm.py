@@ -7,6 +7,14 @@ TIME_SCALE_DAYS = 86400 # number of seconds in a day
 
 UNIX_TIMESTAMP_TYPE = float # float representation of current time
 
+def d1(S, K, r, sigma, T):
+    # d1 = (log(S/K) + (r + (sigma^2/2))) / (sigma sqrt(T))
+    return (np.log(S/K) + (r + ((np.power(sigma,2))/(2))) * T) / (sigma * np.sqrt(T))
+
+def d2(d1, sigma, T):
+    # d2 = d_1 - sigma sqrt(T)
+    return d1 - sigma * np.sqrt(T)
+
 def getBSMPrice(
     strike: float,
     contractType: str,
@@ -24,10 +32,10 @@ def getBSMPrice(
 
     currentPrice = priceData[-1]
 
-    # d1 = (log(S/K) + (r + (sigma^2/2))) / (sigma sqrt(T))
-    d1 = (1/(sd*np.sqrt(tau))) * (np.log(currentPrice/strike) + (r + 0.5*sd**2)*tau)
-    # d2 = d_1 - sigma sqrt(T)
-    d2 = d1 - sd*np.sqrt(tau)
+    # d1 = (1/(sd*np.sqrt(tau))) * (np.log(currentPrice/strike) + (r + 0.5*sd**2)*tau)
+    d1 = d1(currentPrice, strike, r, sd, tau)
+    # d2 = d1 - sd*np.sqrt(tau)
+    d2 = d2(d1, sd, tau)
 
     if contractType == "call":
         # c = S N(d_1) - K e^(-r T) N(d_2)
