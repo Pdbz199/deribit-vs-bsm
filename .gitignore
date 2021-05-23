@@ -4,3 +4,5 @@ notes.txt
 .vscode/
 .ipynb_checkpoints/
 __pycache__
+options_data.csv
+btc_historical_prices.csv
