@@ -2,15 +2,15 @@ import numpy as np
 from scipy.stats import norm
 
 def calculate_d1(S, K, r, sigma, T):
-    # d1 = (log(S/K) + (r + (sigma^2/2))) / (sigma sqrt(T))
+    # d1 = (log(S/K) + (r + (sigma^2/2)) T) / (sigma sqrt(T))
     return (np.log(S/K) + (r + ((np.power(sigma,2))/(2))) * T) / (sigma * np.sqrt(T))
 
 def calculate_d2(d1, sigma, T):
     # d2 = d_1 - sigma sqrt(T)
-    return d1 - sigma * np.sqrt(T)
+    return d1 - (sigma * np.sqrt(T))
 
 def get_bsm_price(
-    S, K, contract_type, r, sigma, T, d1, d2
+    S, K, contract_type, r, T, d1, d2
 ) -> float:
     if contract_type == "call":
         # c = S N(d_1) - K e^(-r T) N(d_2)
