@@ -34,30 +34,59 @@ combined_dataframes = pd.merge(instrument_data, btc_historical_dataframe, on='ti
 # start_time = 1619402183684
 current_time = 1621821383684
 
-r = 0
+r = 0.0
 
+bsm_prices = []
+deribit_prices = []
+
+# graph price comparison - done
+# mean wedge between bsm_prices and deribit_prices
+# time series volatility (same thing as returns but with wedges)
+# graph how the wedge varies with the underlier
+
+# window_size = 1000 #180
+# log_prices = btc_historical_dataframe['close'].apply(lambda close: np.log(close))
+# log_returns = log_prices.pct_change(periods=window_size)
+# btc_historical_dataframe['std_dev'] = log_returns.rolling(window_size).std()
+
+# for_one_contract = combined_dataframes[combined_dataframes['contract_name']==combined_dataframes['contract_name'].iloc[0]]
+# timestamps = (for_one_contract['timestamp'].apply(lambda time: pd.Timestamp(time).strftime('%m-%d %H:%M'))).to_numpy()
+
+all_greeks = pd.DataFrame(np.array([[0, 0, 0, 0, 0]]),
+                   columns=['delta', 'gamma', 'theta', 'vega', 'rho'])
 for i, row in combined_dataframes.iterrows():
     option_type = row['option_type']
-    print("Option type:", option_type)
+    # print("Option type:", option_type)
     S = row['close_y']
-    print("S:", S)
+    # print("S:", S)
     K = row['strike']
-    print("K:", K)
+    # print("K:", K)
     T = row['time_to_expiration']
     T /= SECONDS_PER_YEAR # T is in years
-    print("T:", T)
+    # print("T:", T)
     sigma = row['std_dev']
     sigma *= np.sqrt(MINUTES_PER_YEAR)
-    print("sigma:", sigma)
+    # print("sigma:", sigma)
     d1 = calculate_d1(S, K, r, sigma, T)
-    print("d1:", d1)
+    # print("d1:", d1)
     d2 = calculate_d2(d1, sigma, T)
-    print("d2:", d2)
+    # print("d2:", d2)
     greeks = calculate_greeks(S, K, r, sigma, T, d1, d2, option_type)
-    print("greeks:", greeks)
+    if all_greeks is None: all_greeks = pd.DataFrame(greeks)
+    else: all_greeks = all_greeks.append(greeks, ignore_index=True)
+    # print("greeks:", greeks)
     bsm_price = get_bsm_price(S, K, option_type, r, T, d1, d2)
-    print("BSM price:", bsm_price)
-    deribit_price = row['close_x']
-    print("Deribit price:", deribit_price)
+    # print("BSM price:", bsm_price)
+    bsm_prices.append(bsm_price)
+    deribit_price = row['close_x'] * S
+    # print("Deribit price:", deribit_price)
+    deribit_prices.append(deribit_price)
+
+all_greeks = all_greeks.iloc[1:]
+all_greeks.describe().T['mean']
+
+#%%
+bsm_prices = np.array(bsm_prices)
+deribit_prices = np.array(deribit_prices)
 
 #%%
