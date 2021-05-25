@@ -39,11 +39,6 @@ r = 0.0
 bsm_prices = []
 deribit_prices = []
 
-# graph price comparison - done
-# mean wedge between bsm_prices and deribit_prices
-# time series volatility (same thing as returns but with wedges)
-# graph how the wedge varies with the underlier
-
 # window_size = 1000 #180
 # log_prices = btc_historical_dataframe['close'].apply(lambda close: np.log(close))
 # log_returns = log_prices.pct_change(periods=window_size)
@@ -52,8 +47,11 @@ deribit_prices = []
 # for_one_contract = combined_dataframes[combined_dataframes['contract_name']==combined_dataframes['contract_name'].iloc[0]]
 # timestamps = (for_one_contract['timestamp'].apply(lambda time: pd.Timestamp(time).strftime('%m-%d %H:%M'))).to_numpy()
 
-all_greeks = pd.DataFrame(np.array([[0, 0, 0, 0, 0]]),
-                   columns=['delta', 'gamma', 'theta', 'vega', 'rho'])
+deltas = []
+gammas = []
+thetas = []
+vegas = []
+rhos = []
 for i, row in combined_dataframes.iterrows():
     option_type = row['option_type']
     # print("Option type:", option_type)
@@ -72,18 +70,41 @@ for i, row in combined_dataframes.iterrows():
     d2 = calculate_d2(d1, sigma, T)
     # print("d2:", d2)
     greeks = calculate_greeks(S, K, r, sigma, T, d1, d2, option_type)
-    if all_greeks is None: all_greeks = pd.DataFrame(greeks)
-    else: all_greeks = all_greeks.append(greeks, ignore_index=True)
+    # deltas.append(greeks['delta'])
+    # gammas.append(greeks['gamma'])
+    # thetas.append(greeks['theta'])
+    # vegas.append(greeks['vega'])
+    # rhos.append(greeks['rho'])
     # print("greeks:", greeks)
-    bsm_price = get_bsm_price(S, K, option_type, r, T, d1, d2)
+    # bsm_price = get_bsm_price(S, K, option_type, r, T, d1, d2)
     # print("BSM price:", bsm_price)
-    bsm_prices.append(bsm_price)
-    deribit_price = row['close_x'] * S
+    # bsm_prices.append(bsm_price)
+    # deribit_price = row['close_x'] * S
     # print("Deribit price:", deribit_price)
-    deribit_prices.append(deribit_price)
+    # deribit_prices.append(deribit_price)
+    break
 
-all_greeks = all_greeks.iloc[1:]
-all_greeks.describe().T['mean']
+# wedges = np.load('wedges.npy')
+# combined_dataframes['wedges'] = wedges
+# grouped = combined_dataframes.groupby('timestamp')
+# mean_wedges_over_time = grouped['wedges'].median().to_numpy()
+# grouped_times = np.array(list(map(lambda x: x[5:-3], list(grouped.groups.keys()))))
+# plt.plot(grouped_times, mean_wedges_over_time)
+# plt.xticks(range(0, len(grouped_times), 2000))
+# plt.show()
+
+# greek_cols = ['delta', 'gamma', 'theta', 'vega', 'rho']
+# all_greeks = pd.DataFrame(np.array([deltas, gammas, thetas, vegas, rhos]).T, columns=greek_cols)
+# all_greeks.describe().T.to_csv('greeks.csv')
+all_greeks = pd.read_csv('greeks.csv')
+
+# graph price comparison - done
+# mean wedge between bsm_prices and deribit_prices
+# time series volatility (same thing as returns but with wedges)
+# graph how the (median) wedge varies with the underlier
+
+# summary stats greeks table
+# summary stats for wedge over all contracts and all times
 
 #%%
 bsm_prices = np.array(bsm_prices)
